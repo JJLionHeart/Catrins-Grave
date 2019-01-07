@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -109,7 +110,7 @@ void AnalyzePacket(byte *buffer, int size){
    // If the protocol is not TCP or UDP drop this packet.
    const short UDP = 0x11;
    const short TCP = 0x06;
-   if (protocol != 0x06 && protocol != 0x11) return;
+   if (protocol != 0x06) return;
 
    // Skip the header checksum and unmarshal the source and destination
    // IP Addresses.
@@ -146,8 +147,8 @@ void AnalyzePacket(byte *buffer, int size){
       byte flags = *temp;
       if(flags != 0x02) return;
    }
-
-/*   // Since the packet was not dropped, print all the information.
+/*
+   // Since the packet was not dropped, print all the information.
    printf("Header Length: %d\n", header_length);
    printf("Total Length: %d\n", total_length);
 
@@ -167,7 +168,8 @@ void AnalyzePacket(byte *buffer, int size){
    printf("Destination port: %d\n", destination_port);
    // Print the hexdump of the buffer.
    printbuffer(buffer, size);
-   printf("\n\n");   */
+   printf("\n\n");
+*/
    time_t now = time(NULL);
    FILE* out_file = fopen("log.txt", "a+");
    fprintf(out_file, "%d %d %d.%d.%d.%d %d:%d:%d\n", source_port, destination_port,
@@ -198,6 +200,7 @@ int main(){
    // Start capturing packets
    while(1){
       saddr_size = sizeof(saddr);
+      memset(buffer, 0, 65536);
       data_size = recvfrom(sockfd, buffer, 65536, 0, &saddr, &saddr_size);
 
       // If data_size is less than 0 that means we got an error.
